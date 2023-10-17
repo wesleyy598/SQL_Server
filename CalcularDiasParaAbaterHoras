@@ -1,0 +1,54 @@
+USE [Ideias]
+GO
+
+/****** Object:  StoredProcedure [dbo].[CalcularDiasParaAbaterHoras]    Script Date: 16/10/2023 23:13:18 ******/
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROCEDURE [dbo].[CalcularDiasParaAbaterHoras](
+    @minutos INT,
+    @horas DECIMAL(5,2),
+    @dias INT,
+    @tipo INT
+)
+AS
+BEGIN
+    DECLARE @minutos_de_chegada INT, @minutos_a_abater INT, @dias_necessarios INT, @dias_para_abater INT;
+    DECLARE @horas_para_abater DECIMAL(5,2);
+
+    SET @minutos_de_chegada = @minutos;
+    SET @dias_para_abater = @dias;
+
+    IF @tipo = 0
+    BEGIN
+        SET @horas_para_abater = @horas;
+        SET @minutos_a_abater = @horas_para_abater * 60;
+        SET @dias_necessarios = CEILING(@minutos_a_abater / @minutos_de_chegada);
+        -- Retornar o resultado
+        SELECT 'Você precisa chegar ' + CAST(@minutos AS VARCHAR) + ' minutos mais cedo em ' + CAST(@dias_necessarios AS VARCHAR) + ' dias ' + ' para abater as ' + CAST(@horas_para_abater AS VARCHAR) + ' horas.' AS Resultado;
+    END
+    ELSE IF @tipo = 1
+    BEGIN
+        SET @horas_para_abater = @dias_para_abater * @horas; -- Converter dias em horas
+        SET @minutos_a_abater = @horas_para_abater * 60;
+        SET @dias_necessarios = CEILING(@minutos_a_abater / @minutos_de_chegada);
+        -- Retornar o resultado
+        SELECT 'Você precisa chegar ' + CAST(@minutos AS VARCHAR) + ' minutos mais cedo em ' + CAST(@dias_necessarios AS VARCHAR) + ' dias ' + ' para abater as ' + CAST(@horas_para_abater AS VARCHAR) + ' horas.' AS Resultado;
+    END
+    ELSE
+    BEGIN
+        -- Retornar uma mensagem de erro
+        SELECT 'Tipo inválido. Use 0 para horas ou 1 para dias.' AS Resultado;
+    END
+END;
+
+
+-- Para calcular com base em horas
+EXEC CalcularDiasParaAbaterHoras 30, 59.36, NULL, 0;
+
+-- Para calcular com base em dias
+EXEC CalcularDiasParaAbaterHoras 30, 8.48, 7, 1;
